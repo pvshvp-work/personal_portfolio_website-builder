@@ -52,13 +52,13 @@ jobs:
         id: checkout_repository_step
         uses: actions/checkout@v3
       - name: ⬇ Download Artifact
-        id: download_artiface_step         
+        id: download_artiface_step
         uses: actions/download-artifact@v3
         with:
           name: Website
           path: dist
       - name: ✔️ Verify Artifact
-      id: verify_artifact_step
+        id: verify_artifact_step
         run: |
           echo "Contents of the dist directory after downloading the artifact: "
           ls -l dist
