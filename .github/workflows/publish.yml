@@ -38,7 +38,7 @@ jobs:
         id: build_project_step
         run: |
           dx build --release --features web \
-          && cargo run --release --features prebuild \
+          && cargo run --release --features ssr \
           && cp dist/index.html dist/404.html
           echo "Contents of the dist directory: "
           ls -l dist

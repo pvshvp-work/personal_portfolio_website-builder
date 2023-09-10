@@ -11,6 +11,7 @@ base_path = "."
 [web.watcher]
 watch_path = ["src","public"]
 index_on_404 = true
+reload_html = true
 
 [web.resource]
 style = []
