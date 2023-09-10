@@ -80,4 +80,5 @@ jobs:
           user-name: 'shiva-patt-work'
           user-email: shiva.patt.work@gmail.com
           target-branch: main
+          create-target-branch-if-needed: true
        
