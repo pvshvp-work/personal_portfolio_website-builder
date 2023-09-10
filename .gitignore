@@ -19,5 +19,8 @@ Cargo.lock
 # Website
 /dist
 
+# Nohup
+/nohup.out
+
 # Added by cargo
 /target
