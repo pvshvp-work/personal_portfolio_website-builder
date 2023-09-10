@@ -1,0 +1,23 @@
+[application]
+name = "personal-portfolio-website-builder"
+default_platform = "web"
+out_dir = "dist"
+asset_dir = "public"
+
+[web.app]
+title = "Shivanand Pattanshetti"
+base_path = "."
+
+[web.watcher]
+watch_path = ["src"]
+index_on_404 = true
+
+[web.resource]
+style = []
+script = []
+
+[web.resource.dev]
+script = []
+
+[application.tools]
+binaryen = { wasm_opt = true }

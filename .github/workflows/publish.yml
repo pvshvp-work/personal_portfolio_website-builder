@@ -6,14 +6,17 @@ on:
   push:
       branches:
         - main
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: 🏗 Build
     runs-on: ubuntu-latest
     steps:
-      - name: 🎟 Checkout Git Repository
-        id: checkout_repository_step
-        uses: actions/checkout@v3
       - name: 🔧 Install Toolchain
         id: install_toolchain_step
         uses: actions-rs/toolchain@v1
@@ -29,12 +32,15 @@ jobs:
         id: install_dioxus_cli_step
         shell: bash
         run: cargo install dioxus-cli --locked
+      - name: 🎟 Checkout Git Repository
+        id: checkout_repository_step
+        uses: actions/checkout@v3        
       - name: 🔨 Build Project
         id: build_project_step
-        shell: bash     
         run: |
-          $HOME/.cargo/bin/dx build --features web --release \
-          && cp ./dist/index.html ./dist/404.html
+          dx build --release --features web \
+          && cargo run --release --features prebuild \
+          && cp dist/index.html dist/404.html
           echo "Contents of the dist directory: "
           ls -l dist
       - name: ⬆ Upload Artifact
@@ -49,9 +55,6 @@ jobs:
     name: 🎉 Publish
     runs-on: ubuntu-latest
     steps:
-      - name: 🎟 Checkout Git Repository
-        id: checkout_repository_step
-        uses: actions/checkout@v3
       - name: ⬇ Download Artifact
         id: download_artiface_step
         uses: actions/download-artifact@v3
@@ -63,11 +66,6 @@ jobs:
         run: |
           echo "Contents of the dist directory after downloading the artifact: "
           ls -l dist
-      - name: 🖩 Generate CheckSum
-        id: generate_checksum_step
-        run: |
-          cd ${{ steps.download_package_step.outputs.download-path }}
-          find . -type f -exec sh -c 'sha256sum $0 > $0.sha256sum' {} \;
       - name: ➡️ Push to the Website Repository
         id: push_website_step
         uses: cpina/github-action-push-to-another-repository@main
