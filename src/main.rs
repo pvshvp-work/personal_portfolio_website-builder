@@ -1,13 +1,4 @@
-//! Run with:
-//!
-//! ```sh
-//! dx build --features web --release
-//! cargo run --features ssr
-//! ```
-
-#![allow(non_snake_case, unused)]
 use dioxus::prelude::*;
-use dioxus_fullstack::{launch, prelude::*};
 use dioxus_router::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -15,27 +6,35 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    pre_cache_static_routes_with_props(
-        &ServeConfigBuilder::new_with_router(dioxus_fullstack::router::FullstackRouterConfig::<
-            Route,
-        >::default())
+    use dioxus_fullstack::prelude::pre_cache_static_routes_with_props;
+    use dioxus_fullstack::prelude::IncrementalRendererConfig;
+    use dioxus_fullstack::prelude::ServeConfigBuilder;
+    use dioxus_fullstack::router::FullstackRouterConfig;
+
+    let full_stack_router_config = FullstackRouterConfig::<Route>::default();
+    let incremental_renderer_config = IncrementalRendererConfig::default().static_dir("dist");
+    let serve_config = ServeConfigBuilder::new_with_router(full_stack_router_config)
         .assets_path("dist")
-        .incremental(IncrementalRendererConfig::default().static_dir("dist"))
-        .build(),
-    )
-    .await
-    .unwrap();
+        .incremental(incremental_renderer_config)
+        .build();
+
+    pre_cache_static_routes_with_props(&serve_config)
+        .await
+        .unwrap();
 }
 
 // Hydrate the page
 #[cfg(feature = "web")]
 fn main() {
-    dioxus_web::launch_with_props(
-        dioxus_fullstack::router::RouteWithCfg::<Route>,
-        dioxus_fullstack::prelude::get_root_props_from_document()
-            .expect("Failed to get root props from document"),
-        dioxus_web::Config::default().hydrate(true),
-    );
+    use dioxus_fullstack::prelude::get_root_props_from_document;
+    use dioxus_fullstack::router::RouteWithCfg;
+
+    let root_component = RouteWithCfg::<Route>;
+    let root_properties =
+        get_root_props_from_document().expect("Failed to get root props from document");
+    let web_config = dioxus_web::Config::default().hydrate(true);
+
+    dioxus_web::launch_with_props(root_component, root_properties, web_config);
 }
 
 #[cfg(not(any(feature = "web", feature = "ssr")))]
@@ -49,6 +48,7 @@ enum Route {
     Blog,
 }
 
+#[allow(non_snake_case)]
 #[inline_props]
 fn Blog(cx: Scope) -> Element {
     render! {
@@ -67,8 +67,9 @@ fn Blog(cx: Scope) -> Element {
     }
 }
 
+#[allow(non_snake_case)]
 #[inline_props]
-fn Home(cx: Scope) -> Element {
+fn Home(cx: Scope<HomeProps>) -> Element {
     let mut count = use_state(cx, || 0);
     let text = use_state(cx, || "...".to_string());
 
@@ -78,7 +79,7 @@ fn Home(cx: Scope) -> Element {
             "Go to blog"
         }
         div {
-            h1 { "High-Five counter: {count}" }
+            h1 { "High-Five counter: {count} {text}" }
             button { onclick: move |_| count += 1, "Up high!" }
             button { onclick: move |_| count -= 1, "Down low!" }
         }
