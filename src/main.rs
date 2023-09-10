@@ -1,16 +1,73 @@
 use dioxus::prelude::*;
 use dioxus_fullstack::prelude::*;
+use dioxus_router::prelude::*;
+use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "web")]
 fn main() {
-    LaunchBuilder::new(app).launch();
+    dioxus_web::launch_with_props(
+        dioxus_fullstack::router::RouteWithCfg::<Route>,
+        dioxus_fullstack::prelude::get_root_props_from_document()
+            .expect("Failed to get root props from document"),
+        dioxus_web::Config::default().hydrate(true),
+    );
 }
 
-fn app(cx: Scope) -> Element {
+#[cfg(feature = "prebuild")]
+#[tokio::main]
+async fn main() {
+    pre_cache_static_routes_with_props(
+        &ServeConfigBuilder::new_with_router(dioxus_fullstack::router::FullstackRouterConfig::<
+            Route,
+        >::default())
+        .assets_path("dist")
+        .incremental(IncrementalRendererConfig::default().static_dir("dist"))
+        .build(),
+    )
+    .await
+    .unwrap();
+}
+
+#[derive(Clone, Routable, Debug, PartialEq, Serialize, Deserialize)]
+enum Route {
+    #[route("/")]
+    Home {},
+    #[route("/blog")]
+    Blog,
+}
+
+#[inline_props]
+fn Blog(cx: Scope) -> Element {
+    render! {
+        Link { to: Route::Home {}, "Go to counter" }
+        table {
+            tbody {
+                for _ in 0..100 {
+                    tr {
+                        for _ in 0..100 {
+                            td { "hello world!" }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[inline_props]
+fn Home(cx: Scope) -> Element {
     let mut count = use_state(cx, || 0);
+    let text = use_state(cx, || "...".to_string());
 
     cx.render(rsx! {
-        h1 { "High-Five counter: {count}" }
-        button { onclick: move |_| count += 1, "Up high!" }
-        button { onclick: move |_| count -= 1, "Down low!" }
+        Link {
+            to: Route::Blog {},
+            "Go to blog"
+        }
+        div {
+            h1 { "High-Five counter: {count}" }
+            button { onclick: move |_| count += 1, "Up high!" }
+            button { onclick: move |_| count -= 1, "Down low!" }
+        }
     })
 }
