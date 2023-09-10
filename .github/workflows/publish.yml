@@ -17,10 +17,11 @@ jobs:
       - name: 🔧 Install Toolchain
         id: install_toolchain_step
         uses: actions-rs/toolchain@v1
-        toolchain: stable
-        profile: minimal
-        target: wasm32-unknown-unknown
-        override: true
+        with: 
+          toolchain: stable
+          profile: minimal
+          target: wasm32-unknown-unknown
+          override: true
       - name: 🏬 Setup Caching
         id: setup_caching_step
         uses: Swatinem/rust-cache@v2
