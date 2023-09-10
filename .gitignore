@@ -16,6 +16,8 @@ Cargo.lock
 # Visual Studio Code
 *.code-workspace
 
-# Added by cargo
+# Website
+/dist
 
+# Added by cargo
 /target

@@ -1,0 +1,82 @@
+name: Build and Publish
+run-name: Building and Publication triggered by ${{ github.actor }}
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+      branches:
+        - main
+jobs:
+  build:
+    name: 🏗 Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🎟 Checkout Git Repository
+        id: checkout_repository_step
+        uses: actions/checkout@v3
+      - name: 🔧 Install Toolchain
+        id: install_toolchain_step
+        uses: actions-rs/toolchain@v1
+        toolchain: stable
+        profile: minimal
+        target: wasm32-unknown-unknown
+        override: true
+      - name: 🏬 Setup Caching
+        id: setup_caching_step
+        uses: Swatinem/rust-cache@v2
+      - name: 💿 Install Dioxus-CLI
+        id: install_dioxus_cli_step
+        shell: bash
+        run: cargo install --git https://github.com/DioxusLabs/cli
+      - name: 🔨 Build Project
+        id: build_project_step
+        shell: bash     
+        run: |
+          dioxus build --release \
+          && cp ./dist/index.html ./dist/404.html
+          echo "Contents of the dist directory: "
+          ls -l dist
+      - name: ⬆ Upload Artifact
+        id: upload_artifact_step
+        uses: actions/upload-artifact@v3
+        with: 
+          name: Website
+          path: dist
+          if-no-files-found: error
+  release:  
+    needs: build        
+    name: 🎉 Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🎟 Checkout Git Repository
+        id: checkout_repository_step
+        uses: actions/checkout@v3
+      - name: ⬇ Download Artifact
+        id: download_artiface_step         
+        uses: actions/download-artifact@v3
+        with:
+          name: Website
+          path: dist
+      - name: ✔️ Verify Artifact
+      id: verify_artifact_step
+        run: |
+          echo "Contents of the dist directory after downloading the artifact: "
+          ls -l dist
+      - name: 🖩 Generate CheckSum
+        id: generate_checksum_step
+        run: |
+          cd ${{ steps.download_package_step.outputs.download-path }}
+          find . -type f -exec sh -c 'sha256sum $0 > $0.sha256sum' {} \;
+      - name: ➡️ Push to the Website Repository
+        id: push_website_step
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+        with:          
+          source-directory: 'dist'
+          destination-github-username: 'shiva-patt'
+          destination-repository-name: 'shiva-patt.github.io'
+          user-name: 'shiva-patt-work'
+          user-email: shiva.patt.work@gmail.com
+          target-branch: main
+       
