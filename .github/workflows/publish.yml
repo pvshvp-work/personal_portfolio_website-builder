@@ -28,12 +28,12 @@ jobs:
       - name: 💿 Install Dioxus-CLI
         id: install_dioxus_cli_step
         shell: bash
-        run: cargo install --git https://github.com/DioxusLabs/cli
+        run: cargo install dioxus-cli --locked
       - name: 🔨 Build Project
         id: build_project_step
         shell: bash     
         run: |
-          dioxus build --release \
+          $HOME/.cargo/bin/dx build --features web --release \
           && cp ./dist/index.html ./dist/404.html
           echo "Contents of the dist directory: "
           ls -l dist
