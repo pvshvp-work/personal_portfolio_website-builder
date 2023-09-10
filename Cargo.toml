@@ -1,0 +1,13 @@
+[package]
+name = "personal-portfolio-website-builder"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = []
+ssr = ["dioxus-fullstack/axum"]
+web = ["dioxus-fullstack/web"]
+
+[dependencies]
+dioxus = "0.4"
+dioxus-fullstack = "0.4"
