@@ -16,32 +16,16 @@ jobs:
     name: 🏗 Build
     runs-on: ubuntu-latest
     steps:
-      - name: 🔧 Install Toolchain
-        id: install_toolchain_step
-        uses: actions-rs/toolchain@v1
-        with: 
-          toolchain: stable
-          profile: minimal
-          target: wasm32-unknown-unknown
-          override: true
-      - name: 🏬 Setup Caching
-        id: setup_caching_step
-        uses: Swatinem/rust-cache@v2
-      - name: 💿 Install Dioxus-CLI
-        id: install_dioxus_cli_step
-        shell: bash
-        run: cargo install dioxus-cli --locked
       - name: 🎟 Checkout Git Repository
         id: checkout_repository_step
-        uses: actions/checkout@v3        
+        uses: actions/checkout@v4        
       - name: 🔨 Build Project
         id: build_project_step
-        run: |
-          dx build --release --features web \
-          && cargo run --release --features ssr \
-          && cp dist/index.html dist/404.html
-          echo "Contents of the dist directory: "
-          ls -l dist
+        uses: shalzz/zola-deploy-action@v0.18.0
+        env:
+          BUILD_DIR: dist
+          BUILD_ONLY: true
+          # BUILD_FLAGS: --drafts
       - name: ⬆ Upload Artifact
         id: upload_artifact_step
         uses: actions/upload-artifact@v3
@@ -72,10 +56,10 @@ jobs:
           SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
         with:          
           source-directory: 'dist'
-          destination-github-username: 'shiva-patt'
-          destination-repository-name: 'shiva-patt.github.io'
-          user-name: 'shiva-patt-work'
-          user-email: shiva.patt.work@gmail.com
+          destination-github-username: 'pvshvp'
+          destination-repository-name: 'pvshvp.github.io'
+          user-name: 'pvshvp-work'
+          user-email: pvshvp.work@gmail.com
           target-branch: main
           create-target-branch-if-needed: true
        
