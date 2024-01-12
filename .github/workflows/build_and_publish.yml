@@ -23,9 +23,7 @@ jobs:
         id: build_project_step
         uses: shalzz/zola-deploy-action@v0.18.0
         env:
-          BUILD_DIR: dist
           BUILD_ONLY: true
-          # BUILD_FLAGS: --drafts
       - name: ⬆ Upload Artifact
         id: upload_artifact_step
         uses: actions/upload-artifact@v3
